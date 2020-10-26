@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:controller="client.RegController"
+      xmlns:fx="http://javafx.com/fxml" alignment="center">
+    <Label text="login"/>
+    <TextField fx:id="loginField" promptText="login"/>
+    <Label text="password"/>
+    <PasswordField fx:id="passwordField" promptText="password"/>
+    <Label text="nickname"/>
+    <TextField promptText="nickname" fx:id="nickField"/>
+
+    <TextArea fx:id="textArea" HBox.hgrow="ALWAYS" editable="false" VBox.vgrow="ALWAYS"/>
+    <Button text="reg" minWidth="60" onAction="#clickRegBtn"/>
+
+
+</VBox>

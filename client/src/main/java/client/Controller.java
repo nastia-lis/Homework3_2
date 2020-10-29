@@ -16,12 +16,12 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -54,6 +54,7 @@ public class Controller implements Initializable {
 
     private boolean authenticated;
     private String nickname;
+    private String login;
 
     private void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
@@ -108,9 +109,9 @@ public class Controller implements Initializable {
                         if (str.startsWith("/authok ")) {
                             nickname = str.split("\\s")[1];
                             setAuthenticated(true);
+                            showHistory();
                             break;
                         }
-
                         if (str.startsWith("/regok")) {
                             regController.addMessageTextArea("Регистрация прошла успешно");
                         }
@@ -118,11 +119,10 @@ public class Controller implements Initializable {
                             regController.addMessageTextArea("Зарегистрироватся не удалось\n" +
                                     " возможно такой логин или никнейм уже заняты");
                         }
-
                         textArea.appendText(str + "\n");
                     }
-
                     socket.setSoTimeout(0);
+
                     while (true) {
                         String str = in.readUTF();
 
@@ -145,6 +145,7 @@ public class Controller implements Initializable {
                             }
                         } else {
                             textArea.appendText(str + "\n");
+                            safeHistory(str);
                         }
                     }
                 } catch (SocketTimeoutException e) {
@@ -188,6 +189,9 @@ public class Controller implements Initializable {
 
         String msg = String.format("/auth %s %s",
                 loginField.getText().trim(), passwordField.getText().trim());
+
+        login = loginField.getText().trim();
+
         try {
             out.writeUTF(msg);
             passwordField.clear();
@@ -247,4 +251,26 @@ public class Controller implements Initializable {
         System.out.println(mouseEvent.getButton());
         System.out.println(mouseEvent.getClickCount());
     }
+
+    private void safeHistory(String msg) throws IOException {
+        try (OutputStream safe = new BufferedOutputStream(new FileOutputStream("history/history_" + login + ".txt", true))) {
+            safe.write(msg.getBytes());
+            safe.write("\n".getBytes());
+        }
+    }
+
+    private void showHistory() throws IOException {
+        File file = new File("history/history_" + login + ".txt");
+        if (!file.exists()) {
+            file.createNewFile();
+        } else {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    textArea.appendText(line + "\n");
+                }
+            }
+        }
+    }
+
 }

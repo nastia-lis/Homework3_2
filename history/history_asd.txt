@@ -1,0 +1,5 @@
+[ asd ] private [ asd ] : aaa
+[ qwe ] private [ asd ] : hi
+[ qwe ]: aaa
+[ asd ]: ccc
+[ asd ]: 555

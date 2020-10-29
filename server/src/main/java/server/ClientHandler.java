@@ -1,11 +1,10 @@
 package server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler {
     DataInputStream in;
@@ -26,7 +25,12 @@ public class ClientHandler {
             out = new DataOutputStream(socket.getOutputStream());
             System.out.println("Client connected " + socket.getRemoteSocketAddress());
 
-            new Thread(() -> {
+            /*Выбрала данный пул, так как посчитала что нужен поток который всегда открыт
+            и не нужно его создавать для каждой задачи. Задачи от каждого пользователя идут последовательно,
+            а не паралельно. Считаю что один открытй поток с этим справится.
+            Но возможно, я ошибаюсь)))*/
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            service.execute(() -> {
                 try {
                     socket.setSoTimeout(TIME);
 
@@ -116,8 +120,8 @@ public class ClientHandler {
                         e.printStackTrace();
                     }
                 }
-            }).start();
-
+            });
+            service.shutdown();
         } catch (IOException e) {
             e.printStackTrace();
         }
